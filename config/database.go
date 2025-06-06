@@ -14,12 +14,11 @@ import (
 var DB *gorm.DB
 
 func InitDB() {
-    // Muat file .env
+
     if err := godotenv.Load(); err != nil {
         log.Println("No .env file found, using environment variables")
     }
 
-    // Ambil variabel lingkungan dan buat DSN
     dsn := fmt.Sprintf(
         "host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
         os.Getenv("DB_HOST"),
@@ -29,7 +28,6 @@ func InitDB() {
         os.Getenv("DB_PORT"),
     )
 
-    // Hubungkan ke database
     var err error
     DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
     if err != nil {
@@ -37,7 +35,6 @@ func InitDB() {
     }
     log.Println("Database connected successfully")
 
-    // Migrasi database
     if err := DB.AutoMigrate(&models.User{}); err != nil {
         log.Fatal("Failed to migrate database: ", err)
     }
