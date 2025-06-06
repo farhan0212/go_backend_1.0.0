@@ -16,27 +16,43 @@ func GetUsers(c *fiber.Ctx) error {
 		page = 1
 	}
 
-	limit, err := strconv.Atoi(c.Query("limit", "10"))
-	if err != nil || limit < 1 {
-		limit = 10
-	}
+	limit := 5 // Fixed limit per page
 
 	offset := (page - 1) * limit
 
-	
 	var total int64
 	database.DB.Model(&models.User{}).Count(&total)
-	
 	database.DB.Model(&models.User{}).Limit(limit).Offset(offset).Find(&users)
-	
-	totalPages := int((total + int64(limit) -1) / int64(limit))
+
+	totalPages := int((total + int64(limit) - 1) / int64(limit))
+
+	// Calculate pagination window (max 6 pages shown)
+	var pages []int
+	startPage := page - 2
+	if startPage < 1 {
+		startPage = 1
+	}
+	endPage := startPage + 5
+	if endPage > totalPages {
+		endPage = totalPages
+		startPage = endPage - 5
+		if startPage < 1 {
+			startPage = 1
+		}
+	}
+	for i := startPage; i <= endPage; i++ {
+		pages = append(pages, i)
+	}
 
 	return c.JSON(fiber.Map{
-		"data": users,
-		"page": page,
-		"limit": limit,
-		"total": total,
+		"data":       users,
+		"page":       page,
+		"limit":      limit,
+		"total":      total,
 		"totalPages": totalPages,
+		"pages":      pages, // pages to show in pagination
+		"hasPrev":    page > 1,
+		"hasNext":    page < totalPages,
 	})
 }
 
