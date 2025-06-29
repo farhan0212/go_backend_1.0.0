@@ -32,15 +32,6 @@ jobs:
     if: github.ref == 'refs/heads/main'
     steps:
     - uses: actions/checkout@v4
-
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: '1.23'
-
-    - name: Build
-      run: go build -v ./...
-
     - name: Push to Docker Hub
       run: |
         docker build -t farhan0212/go_backend .
